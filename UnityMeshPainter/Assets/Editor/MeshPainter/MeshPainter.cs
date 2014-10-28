@@ -1,4 +1,4 @@
-﻿/// MeshPainter Unity tool to paint mesh on other mesh. Find under Window/Tools/MeshPainter.
+﻿/// MeshPainter Unity tool to paint mesh on other mesh. Find it under Window/Tools/MeshPainter.
 /// Made by Cyril Carincotte
 /// contact : ccarincotte@gmail.com
 using UnityEngine;
@@ -278,7 +278,10 @@ public class MeshPainter : EditorWindow
         }
         if (prefab == null)
             return;
-        GameObject obj = GameObject.Instantiate(prefab, position, Quaternion.identity) as GameObject;
+        GameObject obj = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+
+        obj.transform.position = position;
+        obj.transform.rotation = Quaternion.identity;
 
         if (painter.parent != null)
             obj.transform.parent = painter.parent.transform;
@@ -294,8 +297,26 @@ public class MeshPainter : EditorWindow
         }
         float scale = Random.Range(painter.minScale, painter.maxScale);
         obj.transform.localScale = new Vector3(scale, scale, scale);
+
         painter._previousCreated.Add(painter._nextInstance);
         painter._nextInstance = obj;
+    }
+
+    protected void BatchInstancies()
+    {
+        if (this._previousCreated.Count == 0)
+        {
+            Debug.LogWarning("No instance generated.");
+            return;
+        }
+        for (int i = 0, size = this._previousCreated.Count; i < size; ++i)
+        {
+            if (this._previousCreated[i] == null)
+            {
+                continue;
+            }
+            this._previousCreated[i].isStatic = true;
+        }
     }
 
     protected static void UnDo()
@@ -533,7 +554,11 @@ public class MeshPainter : EditorWindow
         {
             painter.DestroyPrevious();
         }
-
+        content.text = "Batch instancies";
+        if (GUILayout.Button(content) == true)
+        {
+            painter.BatchInstancies();
+        }
         EditorGUILayout.EndScrollView();
     }
 
