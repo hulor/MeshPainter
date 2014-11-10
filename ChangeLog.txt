@@ -1,0 +1,4 @@
+V0.2 :
+- Fix follow normals.
+- Create prefabs against copy of parent.
+- Batching button : put static flag to true.
